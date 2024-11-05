@@ -19,3 +19,9 @@ docker image inspect izurohman/cmd
 docker build -t izurohman/label label
 docker image inspect izurohman/label
 docker container create --name label izurohman/label
+
+# ADD instruction
+docker build -t izurohman/add add
+docker image inspect izurohman/add
+docker container create --name add izurohman/add
+docker container logs add
