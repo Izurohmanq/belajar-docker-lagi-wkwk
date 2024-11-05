@@ -1,0 +1,120 @@
+Docker Dasar
+
+Buat liat isi docker image
+docker image ls
+
+Buat ambil image dari docker hub
+docker image pull namaimage:tag
+=> (contoh) docker image pull redis:latest
+
+Buat hapus image dari docker local
+docker image rm redis:latest
+
+Melihat Container yang jalan atau tidak
+docker container ls -a
+
+Melihat Container yang jalan atau tidak
+docker container ls
+
+Membuat Container
+docker container create --name namacontainer namaimage:tag
+=> (Contoh) docker container create --name contohredis redis:latest
+=> (Contoh) docker container create --name command izurohman/cmd
+
+Menjalankan Container
+docker container start containerId/namacontainer		/ => atau
+=> (Contoh) docker container start contohredis
+
+Menghentikan Container
+docker container stop containerId/namacontainer		/ => atau
+=> (Contoh) docker container stop contohredis
+
+Menghapus Container
+docker container rm containerId/namacontainer		/ => atau
+=> (Contoh) docker container rm contohredis
+
+Melihat Container Log
+docker container logs containerId/namacontainer		/ => atau
+=> (Contoh) docker container log contohredis
+Melihat Container Log Secara real time
+docker container logs -f containerId/namacontainer		/ => atau
+=> (Contoh) docker container logs -f contohredis
+
+Masuk ke Container/Lebih ke arah mengeksekusi si /bin/bash
+docker container exec -i -t containerId/namacontainer /bin/bash
+=> (Contoh) docker container exec -i -t contohredis /bin/bash
+
+Melakukan Port Forwarding ( tinggal tambah publish )
+docker container create --name namacontainer --publish posthost:portcontainer image:tag
+=> (Contoh) docker container create --name contohnginx --publish 8080:80 nginx:latest
+
+Menambah environment Variable ( Biasanya image tertenru ada env-nya )
+env tuh banyak kembali ke image masing masing
+docker container create --name namacontainer port:port --env KEY=“value” --env KEY2=“value” image:tag
+=> (Contoh) docker container create --name mongodb --publish 27017:27017 --env MONGO_INITDB_ROOT_USERNAME=eko --env MONGO_INITDB_ROOT_PASSWORD=eko mongo:latest
+
+Melihat Status Container
+docker container stats
+
+Menambah Resource Limit
+docker container create --name namacontainer --publish posthost:portcontainer image:tag
+=> (Contoh) docker container create --name contohnginx --publish 8080:80 --memory 100m --cpus 0.5 nginx:latest
+
+Melakukan Mounting ( nambahin --mount )
+docker container create --name namacontainer --mount “type=bind,source=folder,destination=folder,readonly” image:tag
+=> (Contoh) docker container create --name mongodata --publish 27018:27017 --mount “type=bind,source=/Applications/Trap Marq/Belajar-docker/mongo-data,destination=/data/db,readonly” --env MONGO_INITDB_ROOT_USERNAME=eko --env MONGO_INITDB_ROOT_PASSWORD=eko mongo:latest
+
+Melihat Docker Volume ( dulu tuh pake bind, sekarang ada yang terbaru yaitu pake volume )
+docker volume ls
+docker volume rm namacontainer
+docker volume create namavolume
+docker container create --name mongovolume --publish 27019:27017 --mount “type=volume,source=mongodata,destination=/data/db” --env MONGO_INITDB_ROOT_USERNAME=eko --env MONGO_INITDB_ROOT_PASSWORD=eko mongo:latest
+
+Melakukan Backup Volume
+matiin dlu containernya
+baru backpu
+docker container create --name nginxbackup --mount “type=bind,source=/Users/fadliizurohman/belajar-docker/backup,destination=/backup” --mount “type=volume,source=mongodata,destination=/data” nginx:latest 
+tar cvf /backup/backup.tar.gz /data
+
+Melakukan Backup Dengan Container Run
+* matiin dlu containernya
+* baru backpu
+* terus nyalain lagi
+docker container stop mongovolume
+docker container run --rm --name ubuntubackup --mount “type=bind,source=/Users/fadliizurohman/belajar-docker/backup,destination=/backup” --mount “type=volume,source=mongodata,destination=/data” ubuntu:latest tar cvf /backup/backup-lagi.tar.gz /data
+docker container start mongovolume
+
+
+Melakukan Restore Dengan Container Run
+* buat volume restorenya
+* baru backpu
+* terus nyalain lagi
+1. docker container stop mongovolume
+2. docker container run --rm --name ubunturestore --mount “type=bind,source=/Users/fadliizurohman/belajar-docker/backup,destination=/backup” --mount “type=volume,source=mongorestore,destination=/data” ubuntu:latest bash -c “cd /data && tar xvf /backup/backup.tar.gz --strip 1”
+3. docker container start mongovolume
+4. docker container create --name mongorestore --publish 27020:27017 --mount “type=volume,source=mongorestore,destination=/data/db” --env MONGO_INITDB_ROOT_USERNAME=eko --env MONGO_INITDB_ROOT_PASSWORD=eko mongo:latest
+
+Docker Network
+docker network ls => untuk lihat network
+
+Membuat Network
+di mac dan windonws bisa pake bridge, 
+docker network create --driver namadriver namanetwork
+
+Membuat Container dengan Network
+di mac dan windonws bisa pake bridge, 
+docker network create --driver bridge mongonetwork
+docker container create --name mongodb --network mongonetwork --env MONGO_INITDB_ROOT_USERNAME=eko --env MONGO_INITDB_ROOT_PASSWORD=eko mongo:latest
+docker image pull mongo-express:latest
+docker container create --name mongodbexpress --network mongonetwork --publish 8081:8081 --env ME_CONFIG_MONGODB_URL=“mongodb://eko:eko@mongodb:27017/” mongo-express:latest
+docker container start mongodb
+docker container start mongodbexpress
+
+
+Disconnect container dari network
+docker network disconnect namanetwork namacontainer
+docker network disconnect mongonetwork mongodb
+
+Connect container ke network
+docker network connect namanetwork namacontainer
+docker network connect mongonetwork mongodb
