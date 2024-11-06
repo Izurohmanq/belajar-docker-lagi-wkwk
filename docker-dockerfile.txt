@@ -1,0 +1,107 @@
+Dockerfile
+
+Docker Build
+docker build -t username/namaapp:version namabuild
+=> docker build -t izurohman/app:1.0.0 folder-dockerfile
+=> docker build -t izurohman/app:1.0.0 -t izurohman/app:latest folder-dockerfile
+
+From Instruction
+FROM image:version
+=> FROM alpine:3
+
+Run Instruction
+RUN command
+RUN [“executable”, “argument”]
+=> RUN mkdir hello
+=> RUN echo “Hello world” > “hello/world.txt”
+=> RUN cat “hello/world.txt
+
+Display Output
+untuk menambahkan detail, bisa ditambah --progress=plain
+1. kalau misalkan update dan tidak ada perubahan biasanya docker menggunakan cache
+2. kalau misalkan tidak mau mengulangi lagi tanpa menggunakan cache, bisa ditambah --no-cache
+
+Command Instruction
+1. berjalan ketika Docker Container berjalan
+2. tidak dijalankan ketika proses build
+CMD command param param
+CMD [“param”, “param”]
+
+Label Instruction
+Untuk informasi aja, misal nama aplikasi, pembuat, kompani siapa
+LABEL <key>=<value>
+LABEL <key1>=<value1>
+=> LABEL author="Fadli Izurohman"
+=> LABEL company="PT Terang Benderang" website="instagram.com"
+
+Add Instruction
+menambahkan file dari source ke file destination di Docker image
+Bisa deteksi juga apakah ada file yang perlu dikompresi atau tida
+seperti tar.gz
+ADD text/*.txt hello
+
+Copy Instruction
+Sama seperti ADD instruction, tapi copy ini hanya meng-copy saja bdea dengan ADD. Sebisa mungkin menggunakan COPY karena BEST PRACTICE-nya pake COPY, terus gunakan RUN untuk menjalankannya
+=> COPY world.txt hello 
+=> COPY text/*.txt hello
+
+.dockerignore
+sama kyk .gitignore
+
+Expose Instruction
+Untuk menunjukkan ini container mau ditaro di port mana
+EXPOSE port => nanti defaultnya menggunakan TCP
+EXPOSE port/tcp
+EXPOSE port/udp
+
+ENV Instruction
+Untuk ENV intinya
+=> ENV key=value
+=> ENV key1=value1 key2=value2
+
+Volume Instruction
+Sama kyk docker dasar, bisa juga untuk backup
+=> VOLUME /lokasi/folder
+=> VOLUME /lokasi/folder1 /lokasi/folder2
+=> VOLUME [“/lokasi/folder1”, “/lokasi/folder2”]
+
+Working Directory Instruction
+menentukan direktori/folder untuk menjalankan instruksi RUN, CMD, ENTRYPOINT, COPY, dan ADD
+=> WORKDIR /app # artinya workinf directorynya adalah /app
+=> WORKDIR docker # artinya workinf directorynya adalah /app/docker
+=> WORKDIR /home/app # artinya workinf directorynya adalah /home/app
+
+User Instruction
+Aslinya User itu ada di root, ada beberapa yang gak mau usernya itu di root, jadi kehadiran ini untuk mengubah user atau user group
+=> USER <user> # mengubah user
+=> USER <user>:<group> # mengubah user dan group
+
+Argument Instruction
+ada tanda --build-arg
+ARG hanya digunakan pada saat build time, kalau misalkan ingin menggunakan ARG pada CMD harus memasukkan ARG pada ENV
+=> ARG key # membuat argument valuable
+=> ARG key=value
+
+HealthCheck Instruction
+Mengecek apakah container itu sehat atau tidak
+=> HEALTHCHECK NONE # defaultnya begini
+=> HEALTHCHECK [OPTIONS] CMD command
+1. —interval=DURATION (default:30s)
+2. —timeout=DURATION (default:30s)
+3. —start-period=DURATION (default:0s) #tidak disarankan untuk 0s
+4. —retries=N (default:3) # kalau ada error mau retry berapa kali
+
+Entrypoint Instruction
+Untuk menentukan executable file yang akan dijalankan oleh container, erat kaitannya dengan CMD
+=> ENTRYPOINT [“executable”, “param”]
+=> ENTRYPOINT executable param
+
+Multi Builder
+Base Image tuh gede banget, maka dilakukan multi builder agar enak
+=> USER <user> # mengubah user
+=> USER <user>:<group> # mengubah user dan group
+
+Dockerhub
+1. login
+2. masukin token, sebelumnya bikin dulu di security settings acount
+3. kalau udah siap containernya, docker push izurohman/multi
